@@ -66,10 +66,11 @@ im = im.resize((COLS, ROWS), Image.LANCZOS)
 px = im.load()
 
 STATIC = bool(os.environ.get("STATIC"))  # emit frozen state for previews
+IS_DREAMWALKER = "Dreamwalker4u" in os.path.basename(SRC) or os.path.exists(os.path.join(HERE, "..", "Dreamwalker4u.png"))
 
 rows_txt = []
 for y in range(ROWS):
-    if "Dreamwalker4u" in os.path.basename(SRC) and y >= 39:
+    if IS_DREAMWALKER and y >= 39:
         rows_txt.append(" " * COLS)
         continue
     chars = []
@@ -96,7 +97,24 @@ parts.append(
 parts.append('<defs>'
              f'<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">'
              f'<stop offset="0" stop-color="{BG2}"/><stop offset="1" stop-color="{BG}"/>'
-             f'</linearGradient></defs>')
+             f'</linearGradient>'
+             f'<linearGradient id="metalGrad" x1="0" y1="0" x2="0" y2="1">'
+             f'<stop offset="0%" stop-color="#ffffff"/>'
+             f'<stop offset="35%" stop-color="#f1f3f5"/>'
+             f'<stop offset="50%" stop-color="#abb4be"/>'
+             f'<stop offset="51%" stop-color="#7d8590"/>'
+             f'<stop offset="85%" stop-color="#c9d1d9"/>'
+             f'<stop offset="100%" stop-color="#f6f8fa"/>'
+             f'</linearGradient>'
+             f'<linearGradient id="borderGrad" x1="0" y1="0" x2="1" y2="1">'
+             f'<stop offset="0%" stop-color="#d1d5db"/>'
+             f'<stop offset="50%" stop-color="#4b5563"/>'
+             f'<stop offset="100%" stop-color="#111827"/>'
+             f'</linearGradient>'
+             f'<filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">'
+             f'<feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.8"/>'
+             f'</filter>'
+             f'</defs>')
 
 parts.append(f'<rect width="{CANVAS_W}" height="{CANVAS_H}" rx="12" fill="url(#bg)"/>')
 parts.append(f'<rect x="0.5" y="0.5" width="{CANVAS_W-1}" height="{CANVAS_H-1}" rx="12" '
@@ -137,7 +155,7 @@ for ry, line in enumerate(rows_txt):
     )
 
 # ---- 3. draw the vector badge if source is Dreamwalker4u ------------------
-if "Dreamwalker4u" in os.path.basename(SRC):
+if IS_DREAMWALKER:
     badge_y = 620
     badge_w = 720
     badge_x = (CANVAS_W - badge_w) // 2
@@ -149,26 +167,33 @@ if "Dreamwalker4u" in os.path.basename(SRC):
     else:
         parts.append(f'<g opacity="0"><animate attributeName="opacity" from="0" to="1" begin="4.2s" dur="0.8s" fill="freeze"/>')
     
-    # Outer frame
+    # Outer frame with a metallic gradient stroke and a drop shadow filter
     by, bx, bw = badge_y, badge_x, badge_w
     pts = f"{bx},{by+20} {bx+20},{by} {bx+bw-20},{by} {bx+bw},{by+20} {bx+bw},{by+bh-20} {bx+bw-20},{by+bh} {bx+20},{by+bh} {bx},{by+bh-20}"
-    parts.append(f'<polygon points="{pts}" fill="{BG}" stroke="{FRAME}" stroke-width="2"/>')
+    parts.append(f'<polygon points="{pts}" fill="{BG}" stroke="url(#metalGrad)" stroke-width="2.5" filter="url(#shadow)"/>')
     
     # Dash lines
-    parts.append(f'<line x1="{bx+10}" y1="{by+30}" x2="{bx+bw-10}" y2="{by+30}" stroke="{FRAME}" stroke-dasharray="4 4"/>')
-    parts.append(f'<line x1="{bx+10}" y1="{by+bh-35}" x2="{bx+bw-10}" y2="{by+bh-35}" stroke="{FRAME}" stroke-dasharray="4 4"/>')
+    parts.append(f'<line x1="{bx+10}" y1="{by+30}" x2="{bx+bw-10}" y2="{by+30}" stroke="url(#borderGrad)" stroke-width="1.5" stroke-dasharray="6 3"/>')
+    parts.append(f'<line x1="{bx+10}" y1="{by+bh-35}" x2="{bx+bw-10}" y2="{by+bh-35}" stroke="url(#borderGrad)" stroke-width="1.5" stroke-dasharray="6 3"/>')
     
-    # DREAMWALKER4U Text
-    parts.append(f'<text x="{CANVAS_W/2}" y="{by+82}" fill="{INK}" font-size="44" font-weight="900" letter-spacing="6px" text-anchor="middle">DREAMWALKER4U</text>')
+    # DREAMWALKER4U Text - Ultra-bold system-ui font stack with metallic gradient, stroke outline, and shadow filter
+    font_stack = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+    parts.append(
+        f'<text x="{CANVAS_W/2}" y="{by+85}" fill="url(#metalGrad)" stroke="#090d13" stroke-width="5" paint-order="stroke fill" '
+        f'font-family="{font_stack}" font-size="46" font-weight="900" letter-spacing="8px" filter="url(#shadow)" text-anchor="middle">DREAMWALKER4U</text>'
+    )
     
     # Tagline
-    parts.append(f'<text x="{CANVAS_W/2}" y="{by+125}" fill="{TITLE_TEXT}" font-size="12" font-weight="700" letter-spacing="4px" text-anchor="middle">THINK. ANALYZE. SECURE. CREATE.</text>')
+    parts.append(
+        f'<text x="{CANVAS_W/2}" y="{by+125}" fill="{INK}" font-family="{font_stack}" font-size="13" font-weight="800" '
+        f'letter-spacing="5px" text-anchor="middle">THINK. ANALYZE. SECURE. CREATE.</text>'
+    )
     
     # Padlock icon
     lock_x = CANVAS_W // 2 - 8
-    lock_y = by + bh - 24
-    parts.append(f'<rect x="{lock_x}" y="{lock_y}" width="16" height="12" rx="2" fill="none" stroke="{TITLE_TEXT}" stroke-width="1.5"/>')
-    parts.append(f'<path d="M {lock_x+4} {lock_y} A 4 4 0 0 1 {lock_x+12} {lock_y}" fill="none" stroke="{TITLE_TEXT}" stroke-width="1.5"/>')
+    lock_y = by + bh - 26
+    parts.append(f'<rect x="{lock_x}" y="{lock_y}" width="16" height="12" rx="2" fill="none" stroke="url(#metalGrad)" stroke-width="2"/>')
+    parts.append(f'<path d="M {lock_x+4} {lock_y} A 4 4 0 0 1 {lock_x+12} {lock_y}" fill="none" stroke="url(#metalGrad)" stroke-width="2"/>')
     
     parts.append('</g>')
 
