@@ -69,6 +69,9 @@ STATIC = bool(os.environ.get("STATIC"))  # emit frozen state for previews
 
 rows_txt = []
 for y in range(ROWS):
+    if "Dreamwalker4u" in os.path.basename(SRC) and y >= 39:
+        rows_txt.append(" " * COLS)
+        continue
     chars = []
     for x in range(COLS):
         lum = px[x, y] / 255.0
@@ -132,6 +135,42 @@ for ry, line in enumerate(rows_txt):
         f'<set attributeName="opacity" to="0.85" begin="{delay:.3f}s"/>'
         f'<set attributeName="opacity" to="0" begin="{delay+ROW_DUR:.3f}s"/></rect>'
     )
+
+# ---- 3. draw the vector badge if source is Dreamwalker4u ------------------
+if "Dreamwalker4u" in os.path.basename(SRC):
+    badge_y = 620
+    badge_w = 720
+    badge_x = (CANVAS_W - badge_w) // 2
+    bh = 175
+    
+    # Wrap in animated group if not static
+    if STATIC:
+        parts.append('<g>')
+    else:
+        parts.append(f'<g opacity="0"><animate attributeName="opacity" from="0" to="1" begin="4.2s" dur="0.8s" fill="freeze"/>')
+    
+    # Outer frame
+    by, bx, bw = badge_y, badge_x, badge_w
+    pts = f"{bx},{by+20} {bx+20},{by} {bx+bw-20},{by} {bx+bw},{by+20} {bx+bw},{by+bh-20} {bx+bw-20},{by+bh} {bx+20},{by+bh} {bx},{by+bh-20}"
+    parts.append(f'<polygon points="{pts}" fill="{BG}" stroke="{FRAME}" stroke-width="2"/>')
+    
+    # Dash lines
+    parts.append(f'<line x1="{bx+10}" y1="{by+30}" x2="{bx+bw-10}" y2="{by+30}" stroke="{FRAME}" stroke-dasharray="4 4"/>')
+    parts.append(f'<line x1="{bx+10}" y1="{by+bh-35}" x2="{bx+bw-10}" y2="{by+bh-35}" stroke="{FRAME}" stroke-dasharray="4 4"/>')
+    
+    # DREAMWALKER4U Text
+    parts.append(f'<text x="{CANVAS_W/2}" y="{by+82}" fill="{INK}" font-size="44" font-weight="900" letter-spacing="6px" text-anchor="middle">DREAMWALKER4U</text>')
+    
+    # Tagline
+    parts.append(f'<text x="{CANVAS_W/2}" y="{by+125}" fill="{TITLE_TEXT}" font-size="12" font-weight="700" letter-spacing="4px" text-anchor="middle">THINK. ANALYZE. SECURE. CREATE.</text>')
+    
+    # Padlock icon
+    lock_x = CANVAS_W // 2 - 8
+    lock_y = by + bh - 24
+    parts.append(f'<rect x="{lock_x}" y="{lock_y}" width="16" height="12" rx="2" fill="none" stroke="{TITLE_TEXT}" stroke-width="1.5"/>')
+    parts.append(f'<path d="M {lock_x+4} {lock_y} A 4 4 0 0 1 {lock_x+12} {lock_y}" fill="none" stroke="{TITLE_TEXT}" stroke-width="1.5"/>')
+    
+    parts.append('</g>')
 
 # status bar with a steady blinking cursor
 status_line_y = TITLEBAR_H + ART_H + PAD * 0.35

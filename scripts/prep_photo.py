@@ -26,33 +26,50 @@ OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, "..", "source-pre
 # Load and optionally crop to focus on the subject
 im = Image.open(INP)
 if "Dreamwalker4u.png" in os.path.basename(INP):
-    print("Detected Dreamwalker4u.png, performing centered square crop to focus on subject...")
-    # Square crop: 1154x1154 to keep the DREAMWALKER4U engraving at the bottom
-    w, h = im.size
-    left = 50
-    top = 50
-    right = 1204
-    bottom = 1204
-    im = im.crop((left, top, right, bottom))
+    print("Detected Dreamwalker4u.png, using uncropped threshold-mask background removal and badge inversion...")
+    gray_orig = np.array(im.convert("L"))
+    is_bg = (gray_orig >= 253)
+    
+    # Apply CLAHE to boost contrast on the hooded figure
+    clahe = cv2.createCLAHE(clipLimit=3.5, tileGridSize=(8, 8))
+    gray_clahe = clahe.apply(gray_orig)
+    
+    # Invert the badge region (y >= 870), keeping background excluded
+    badge_y_start = 870
+    badge_mask = (np.arange(im.size[1])[:, None] >= badge_y_start) & (~is_bg)
+    
+    gray_final = gray_clahe.copy()
+    gray_final[badge_mask] = 255 - gray_final[badge_mask]
+    gray_final[is_bg] = 255
+    
+    # Feather background edges slightly
+    sticker_mask = (~is_bg).astype(np.float32)
+    sticker_mask_blur = cv2.GaussianBlur(sticker_mask, (0, 0), 0.5)
+    
+    out = gray_final.astype(np.float32) * sticker_mask_blur + 255.0 * (1.0 - sticker_mask_blur)
+    out = np.clip(out, 0, 255).astype(np.uint8)
+    
+    Image.fromarray(out, mode="L").save(OUT)
+    print("wrote", OUT, out.shape)
+else:
+    # 1. cut out the subject
+    cut = remove(im.convert("RGBA"))
+    rgb = np.array(cut.convert("RGB"))
+    alpha = np.array(cut.split()[-1])                 # 0 = background
 
-# 1. cut out the subject
-cut = remove(im.convert("RGBA"))
-rgb = np.array(cut.convert("RGB"))
-alpha = np.array(cut.split()[-1])                 # 0 = background
+    # 2. local-contrast the luminance (CLAHE)
+    gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
+    clahe = cv2.createCLAHE(clipLimit=3.5, tileGridSize=(8, 8))
+    gray = clahe.apply(gray)
 
-# 2. local-contrast the luminance (CLAHE)
-gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
-clahe = cv2.createCLAHE(clipLimit=3.5, tileGridSize=(8, 8))
-gray = clahe.apply(gray)
+    # a touch of global lift so the face sits in the sparse end of the ramp
+    gray = cv2.convertScaleAbs(gray, alpha=1.2, beta=2)
 
-# a touch of global lift so the face sits in the sparse end of the ramp
-gray = cv2.convertScaleAbs(gray, alpha=1.2, beta=2)
+    # 3. paste onto white using the alpha mask (feathered a hair to avoid a halo)
+    mask = (alpha.astype(np.float32) / 255.0)
+    mask = cv2.GaussianBlur(mask, (0, 0), 0.5)
+    out = gray.astype(np.float32) * mask + 255.0 * (1.0 - mask)
+    out = np.clip(out, 0, 255).astype(np.uint8)
 
-# 3. paste onto white using the alpha mask (feathered a hair to avoid a halo)
-mask = (alpha.astype(np.float32) / 255.0)
-mask = cv2.GaussianBlur(mask, (0, 0), 0.5)
-out = gray.astype(np.float32) * mask + 255.0 * (1.0 - mask)
-out = np.clip(out, 0, 255).astype(np.uint8)
-
-Image.fromarray(out, mode="L").save(OUT)
-print("wrote", OUT, out.shape)
+    Image.fromarray(out, mode="L").save(OUT)
+    print("wrote", OUT, out.shape)
