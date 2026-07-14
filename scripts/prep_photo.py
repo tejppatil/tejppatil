@@ -34,12 +34,10 @@ if "Dreamwalker4u.png" in os.path.basename(INP):
     clahe = cv2.createCLAHE(clipLimit=3.5, tileGridSize=(8, 8))
     gray_clahe = clahe.apply(gray_orig)
     
-    # Invert the badge region (y >= 870), keeping background excluded
-    badge_y_start = 870
-    badge_mask = (np.arange(im.size[1])[:, None] >= badge_y_start) & (~is_bg)
-    
+    # Invert the ENTIRE sticker region so that the dark-to-light mapping in make_ascii_svg.py
+    # renders the bright elements (visor, text, details) as bright ink, and dark elements as spaces.
     gray_final = gray_clahe.copy()
-    gray_final[badge_mask] = 255 - gray_final[badge_mask]
+    gray_final[~is_bg] = 255 - gray_final[~is_bg]
     gray_final[is_bg] = 255
     
     # Feather background edges slightly

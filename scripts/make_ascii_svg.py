@@ -23,10 +23,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "..", "source-prepped.png")
 OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, "..", "avi-ascii.svg")
 
-COLS = 100
-ROWS = 53
-CELL_W = 8
-CELL_H = 15
+COLS = 130
+ROWS = 69
+CELL_W = 6.2
+CELL_H = 11.5
 RAMP = " .`:-=+*cs#%@"  # bright(sparse) -> dark(dense); leading space clears bg
 
 # the prepped image already has bg removed + CLAHE local contrast, so only
@@ -53,8 +53,8 @@ INK = "#c9d1d9"      # the single ascii color (matches Andrew6rant)
 CURSOR = "#c9d1d9"
 
 # ---- reveal timing (one-shot; a cursor rasters top -> bottom) -------------
-ROW_DUR = 0.11
-STAGGER = 0.11       # == ROW_DUR -> a single cursor sweeping down
+ROW_DUR = 0.08
+STAGGER = 0.08       # == ROW_DUR -> a single cursor sweeping down
 
 # ---- 1. sample the image into a COLS x ROWS grayscale grid ----------------
 im = Image.open(SRC).convert("L")               # grayscale
@@ -70,7 +70,7 @@ IS_DREAMWALKER = "Dreamwalker4u" in os.path.basename(SRC) or os.path.exists(os.p
 
 rows_txt = []
 for y in range(ROWS):
-    if IS_DREAMWALKER and y >= 39:
+    if IS_DREAMWALKER and y >= 52:
         rows_txt.append(" " * COLS)
         continue
     chars = []
@@ -94,29 +94,41 @@ parts.append(
     f'viewBox="0 0 {CANVAS_W} {CANVAS_H}" font-family="ui-monospace, SFMono-Regular, '
     f'Menlo, Consolas, monospace">'
 )
-parts.append('<defs>'
-             f'<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">'
-             f'<stop offset="0" stop-color="{BG2}"/><stop offset="1" stop-color="{BG}"/>'
-             f'</linearGradient>'
-             f'<linearGradient id="metalGrad" x1="0" y1="0" x2="0" y2="1">'
-             f'<stop offset="0%" stop-color="#ffffff"/>'
-             f'<stop offset="35%" stop-color="#f1f3f5"/>'
-             f'<stop offset="50%" stop-color="#abb4be"/>'
-             f'<stop offset="51%" stop-color="#7d8590"/>'
-             f'<stop offset="85%" stop-color="#c9d1d9"/>'
-             f'<stop offset="100%" stop-color="#f6f8fa"/>'
-             f'</linearGradient>'
-             f'<linearGradient id="borderGrad" x1="0" y1="0" x2="1" y2="1">'
-             f'<stop offset="0%" stop-color="#d1d5db"/>'
-             f'<stop offset="50%" stop-color="#4b5563"/>'
-             f'<stop offset="100%" stop-color="#111827"/>'
-             f'</linearGradient>'
-             f'<filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">'
-             f'<feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.8"/>'
-             f'</filter>'
-             f'</defs>')
+parts.append(
+    '<defs>'
+    f'<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">'
+    f'<stop offset="0" stop-color="{BG2}"/><stop offset="1" stop-color="{BG}"/>'
+    f'</linearGradient>'
+    f'<linearGradient id="textGrad" x1="0" y1="0" x2="0" y2="1">'
+    f'<stop offset="0%" stop-color="#ffffff"/>'
+    f'<stop offset="40%" stop-color="#e1e4e8"/>'
+    f'<stop offset="80%" stop-color="#abb4be"/>'
+    f'<stop offset="100%" stop-color="#7d8590"/>'
+    f'</linearGradient>'
+    f'<linearGradient id="chromeGrad" x1="0" y1="0" x2="0" y2="1">'
+    f'<stop offset="0%" stop-color="#ffffff"/>'
+    f'<stop offset="40%" stop-color="#f1f3f5"/>'
+    f'<stop offset="45%" stop-color="#9ca3af"/>'
+    f'<stop offset="70%" stop-color="#4b5563"/>'
+    f'<stop offset="100%" stop-color="#1f2937"/>'
+    f'</linearGradient>'
+    f'<linearGradient id="silverGrad" x1="0" y1="0" x2="1" y2="1">'
+    f'<stop offset="0%" stop-color="#f3f4f6"/>'
+    f'<stop offset="50%" stop-color="#9ca3af"/>'
+    f'<stop offset="100%" stop-color="#374151"/>'
+    f'</linearGradient>'
+    f'<filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">'
+    f'<feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.8"/>'
+    f'</filter>'
+    f'<pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">'
+    f'<rect width="20" height="20" fill="none"/>'
+    f'<path d="M 20 0 L 0 0 0 20" fill="none" stroke="#30363d" stroke-width="0.5" stroke-opacity="0.25"/>'
+    f'</pattern>'
+    f'</defs>'
+)
 
 parts.append(f'<rect width="{CANVAS_W}" height="{CANVAS_H}" rx="12" fill="url(#bg)"/>')
+parts.append(f'<rect width="{CANVAS_W}" height="{CANVAS_H}" rx="12" fill="url(#grid)"/>')
 parts.append(f'<rect x="0.5" y="0.5" width="{CANVAS_W-1}" height="{CANVAS_H-1}" rx="12" '
              f'fill="none" stroke="{FRAME}" stroke-width="1"/>')
 
@@ -133,7 +145,7 @@ for ry, line in enumerate(rows_txt):
     row_y = art_top + ry * CELL_H
     delay = ry * STAGGER
     safe = html.escape(line)
-    text = (f'<text xml:space="preserve" x="{PAD}" y="{y:.1f}" fill="{INK}" '
+    text = (f'<text xml:space="preserve" x="{PAD}" y="{y:.1f}" fill="url(#textGrad)" filter="url(#shadow)" '
             f'font-size="{font_size:.1f}" textLength="{ART_W}" lengthAdjust="spacing">{safe}</text>')
 
     if STATIC:
@@ -157,43 +169,59 @@ for ry, line in enumerate(rows_txt):
 # ---- 3. draw the vector badge if source is Dreamwalker4u ------------------
 if IS_DREAMWALKER:
     badge_y = 620
-    badge_w = 720
+    badge_h = 175
+    badge_w = 760
     badge_x = (CANVAS_W - badge_w) // 2
-    bh = 175
+    
+    # Animation delay based on 52 rows * 0.08s stagger = 4.16s
+    badge_delay = 4.2
     
     # Wrap in animated group if not static
     if STATIC:
         parts.append('<g>')
     else:
-        parts.append(f'<g opacity="0"><animate attributeName="opacity" from="0" to="1" begin="4.2s" dur="0.8s" fill="freeze"/>')
+        parts.append(f'<g opacity="0"><animate attributeName="opacity" from="0" to="1" begin="{badge_delay:.2f}s" dur="0.8s" fill="freeze"/>')
     
-    # Outer frame with a metallic gradient stroke and a drop shadow filter
-    by, bx, bw = badge_y, badge_x, badge_w
-    pts = f"{bx},{by+20} {bx+20},{by} {bx+bw-20},{by} {bx+bw},{by+20} {bx+bw},{by+bh-20} {bx+bw-20},{by+bh} {bx+20},{by+bh} {bx},{by+bh-20}"
-    parts.append(f'<polygon points="{pts}" fill="{BG}" stroke="url(#metalGrad)" stroke-width="2.5" filter="url(#shadow)"/>')
+    # Outer frame with a custom winged shape, metallic gradient stroke, and drop shadow
+    by, bx, bw, bh = badge_y, badge_x, badge_w, badge_h
+    pts_outer = f"{bx+50},{by} {bx+bw-50},{by} {bx+bw},{by+50} {bx+bw-40},{by+110} {bx+bw-120},{by+120} {bx+bw-140},{by+150} {CANVAS_W/2},{by+bh} {bx+140},{by+150} {bx+120},{by+120} {bx+40},{by+110} {bx},{by+50}"
+    parts.append(f'<polygon points="{pts_outer}" fill="{BG}" stroke="url(#silverGrad)" stroke-width="2.5" filter="url(#shadow)"/>')
     
-    # Dash lines
-    parts.append(f'<line x1="{bx+10}" y1="{by+30}" x2="{bx+bw-10}" y2="{by+30}" stroke="url(#borderGrad)" stroke-width="1.5" stroke-dasharray="6 3"/>')
-    parts.append(f'<line x1="{bx+10}" y1="{by+bh-35}" x2="{bx+bw-10}" y2="{by+bh-35}" stroke="url(#borderGrad)" stroke-width="1.5" stroke-dasharray="6 3"/>')
+    # Inner border to create double-border highlight
+    pts_inner = f"{bx+52},{by+4} {bx+bw-52},{by+4} {bx+bw-4},{by+50} {bx+bw-42},{by+107} {bx+bw-121},{by+116} {bx+bw-141},{by+145} {CANVAS_W/2},{by+bh-4} {bx+141},{by+145} {bx+121},{by+116} {bx+42},{by+107} {bx+4},{by+50}"
+    parts.append(f'<polygon points="{pts_inner}" fill="none" stroke="url(#silverGrad)" stroke-width="1.2" stroke-opacity="0.8"/>')
     
-    # DREAMWALKER4U Text - Ultra-bold system-ui font stack with metallic gradient, stroke outline, and shadow filter
+    # Hexagon for padlock at the bottom center
+    lock_center_y = by + 144
+    hex_pts = f"411,{lock_center_y-14} 435,{lock_center_y-14} 447,{lock_center_y} 435,{lock_center_y+14} 411,{lock_center_y+14} 399,{lock_center_y}"
+    parts.append(f'<polygon points="{hex_pts}" fill="{BG}" stroke="url(#silverGrad)" stroke-width="1.5"/>')
+    
+    # Padlock icon inside hexagon
+    lock_x = 415
+    lock_y = lock_center_y - 7
+    parts.append(f'<rect x="{lock_x}" y="{lock_y}" width="16" height="12" rx="2" fill="none" stroke="url(#silverGrad)" stroke-width="1.5"/>')
+    parts.append(f'<path d="M {lock_x+4} {lock_y} A 4 4 0 0 1 {lock_x+12} {lock_y}" fill="none" stroke="url(#silverGrad)" stroke-width="1.5"/>')
+    
+    # Decorative horizontal cyber lines extending from the padlock hexagon
+    parts.append(f'<line x1="160" y1="{lock_center_y}" x2="399" y2="{lock_center_y}" stroke="url(#silverGrad)" stroke-width="1.2" stroke-dasharray="8 4"/>')
+    parts.append(f'<line x1="447" y1="{lock_center_y}" x2="686" y2="{lock_center_y}" stroke="url(#silverGrad)" stroke-width="1.2" stroke-dasharray="8 4"/>')
+    
+    # Accent dots on the ends of the lines
+    parts.append(f'<circle cx="160" cy="{lock_center_y}" r="2" fill="url(#silverGrad)"/>')
+    parts.append(f'<circle cx="686" cy="{lock_center_y}" r="2" fill="url(#silverGrad)"/>')
+    
+    # DREAMWALKER4U Text - slanted, bold system font, chrome gradient fill, dark outline, shadow
     font_stack = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
     parts.append(
-        f'<text x="{CANVAS_W/2}" y="{by+85}" fill="url(#metalGrad)" stroke="#090d13" stroke-width="5" paint-order="stroke fill" '
-        f'font-family="{font_stack}" font-size="46" font-weight="900" letter-spacing="8px" filter="url(#shadow)" text-anchor="middle">DREAMWALKER4U</text>'
+        f'<text x="{CANVAS_W/2}" y="{by+78}" fill="url(#chromeGrad)" stroke="#090d13" stroke-width="6" paint-order="stroke fill" '
+        f'font-family="{font_stack}" font-size="46" font-weight="900" letter-spacing="8px" filter="url(#shadow)" transform="skewX(-10)" transform-origin="{CANVAS_W/2} {by+78}" text-anchor="middle">DREAMWALKER4U</text>'
     )
     
-    # Tagline
+    # Tagline text
     parts.append(
-        f'<text x="{CANVAS_W/2}" y="{by+125}" fill="{INK}" font-family="{font_stack}" font-size="13" font-weight="800" '
+        f'<text x="{CANVAS_W/2}" y="{by+116}" fill="{INK}" font-family="{font_stack}" font-size="12" font-weight="800" '
         f'letter-spacing="5px" text-anchor="middle">THINK. ANALYZE. SECURE. CREATE.</text>'
     )
-    
-    # Padlock icon
-    lock_x = CANVAS_W // 2 - 8
-    lock_y = by + bh - 26
-    parts.append(f'<rect x="{lock_x}" y="{lock_y}" width="16" height="12" rx="2" fill="none" stroke="url(#metalGrad)" stroke-width="2"/>')
-    parts.append(f'<path d="M {lock_x+4} {lock_y} A 4 4 0 0 1 {lock_x+12} {lock_y}" fill="none" stroke="url(#metalGrad)" stroke-width="2"/>')
     
     parts.append('</g>')
 
