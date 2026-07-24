@@ -16,7 +16,7 @@
 
 **Cybersecurity Student · Eager Red Teamer · Hungry for the new red world**
 
-[![Portfolio](https://img.shields.io/badge/Portfolio-Dreamwalker4u-FEE12B?style=for-the-badge&logo=googleearth&logoColor=00f0ff&labelColor=555555)](https://dreamwalker4u.me/)
+[![Portfolio](https://img.shields.io/badge/Portfolio-Dreamwalker4u-2a8cb8?style=for-the-badge&logo=googleearth&logoColor=00f0ff&labelColor=555555)](https://dreamwalker4u.me/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-tejpatil12-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/tejpatil12)
 [![Instagram](https://img.shields.io/badge/Instagram-t__e__j.patil-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://instagram.com/t_e_j.patil)
 
