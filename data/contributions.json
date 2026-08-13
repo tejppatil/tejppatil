@@ -1,22 +1,22 @@
 {
   "username": "tejppatil",
-  "generated_at": "2026-08-12T02:03:18Z",
+  "generated_at": "2026-08-13T02:05:47Z",
   "range": {
     "start": "2025-08-10",
+    "end": "2026-08-13"
+  },
+  "total_contributions": 111,
+  "active_days": 27,
+  "avg_per_active_day": 4.1,
+  "current_streak": {
+    "length": 1,
+    "start": "2026-08-12",
     "end": "2026-08-12"
   },
-  "total_contributions": 120,
-  "active_days": 30,
-  "avg_per_active_day": 4.0,
-  "current_streak": {
-    "length": 0,
-    "start": null,
-    "end": null
-  },
   "longest_streak": {
-    "length": 4,
-    "start": "2026-01-09",
-    "end": "2026-01-12"
+    "length": 3,
+    "start": "2026-07-12",
+    "end": "2026-07-14"
   },
   "best_day": {
     "date": "2026-07-12",
@@ -25,11 +25,11 @@
   "monthly": [
     {
       "month": "2025-08",
-      "total": 11
+      "total": 6
     },
     {
       "month": "2025-09",
-      "total": 9
+      "total": 8
     },
     {
       "month": "2025-10",
@@ -45,11 +45,11 @@
     },
     {
       "month": "2026-01",
-      "total": 12
+      "total": 9
     },
     {
       "month": "2026-02",
-      "total": 13
+      "total": 12
     },
     {
       "month": "2026-03",
@@ -69,11 +69,11 @@
     },
     {
       "month": "2026-07",
-      "total": 46
+      "total": 45
     },
     {
       "month": "2026-08",
-      "total": 0
+      "total": 2
     }
   ],
   "days": [
@@ -91,7 +91,7 @@
     },
     {
       "date": "2025-08-13",
-      "count": 2
+      "count": 1
     },
     {
       "date": "2025-08-14",
@@ -127,7 +127,7 @@
     },
     {
       "date": "2025-08-22",
-      "count": 9
+      "count": 5
     },
     {
       "date": "2025-08-23",
@@ -167,7 +167,7 @@
     },
     {
       "date": "2025-09-01",
-      "count": 3
+      "count": 2
     },
     {
       "date": "2025-09-02",
@@ -659,7 +659,7 @@
     },
     {
       "date": "2026-01-02",
-      "count": 3
+      "count": 2
     },
     {
       "date": "2026-01-03",
@@ -679,7 +679,7 @@
     },
     {
       "date": "2026-01-07",
-      "count": 1
+      "count": 0
     },
     {
       "date": "2026-01-08",
@@ -695,7 +695,7 @@
     },
     {
       "date": "2026-01-11",
-      "count": 1
+      "count": 0
     },
     {
       "date": "2026-01-12",
@@ -811,7 +811,7 @@
     },
     {
       "date": "2026-02-09",
-      "count": 1
+      "count": 0
     },
     {
       "date": "2026-02-10",
@@ -1387,7 +1387,7 @@
     },
     {
       "date": "2026-07-03",
-      "count": 1
+      "count": 0
     },
     {
       "date": "2026-07-04",
@@ -1547,6 +1547,10 @@
     },
     {
       "date": "2026-08-12",
+      "count": 2
+    },
+    {
+      "date": "2026-08-13",
       "count": 0
     }
   ]
